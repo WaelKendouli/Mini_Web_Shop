@@ -1,0 +1,349 @@
+      /* =========================================================
+         ✅ Code Overview (Beginner Friendly)
+         ---------------------------------------------------------
+         ✅ Purpose:
+            - Simple "Shop" UI with Products + Basket (Cart)
+            - Products are stored in IndexedDB (offline-like storage)
+            - Cart is stored in IndexedDB too, so it survives refresh
+
+         ✅ Layout:
+            - Left panel  → Products grid (Add to Basket)
+            - Right panel → Basket items + total + clear + checkout
+            - Bottom area → Status indicator (dot + message)
+
+         ✅ Flow (High Level):
+            1️⃣ Open / create IndexedDB database (ShopDB)
+            2️⃣ Create two stores: "products" and "cart"
+            3️⃣ Seed products (only on first run / upgrade)
+            4️⃣ Load products and show them as cards
+            5️⃣ User adds products to basket → cart store updates
+            6️⃣ Render basket items + calculate total each time
+
+         ✅ Key Concepts:
+            - indexedDB.open() + onupgradeneeded()
+            - object stores + transactions (readonly / readwrite)
+            - getAll(), get(), put(), add(), delete(), clear()
+            - keeping UI in sync with IndexedDB (renderCart)
+         ========================================================= */
+
+      * {
+        box-sizing: border-box; /* ✅ predictable sizing */
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+
+        /* ✅ center the app in the page */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        /* ✅ dark background gradient */
+        background: radial-gradient(circle at top, #111827, #020617 60%);
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        color: #f9fafb;
+      }
+
+      /* ✅ main shell: 2 columns (products + cart) */
+      .page-shell {
+        width: 1150px;
+        max-width: 96vw;
+        background: #020617;
+        border-radius: 22px;
+        box-shadow: 0 26px 70px rgba(0, 0, 0, 0.9);
+        border: 1px solid rgba(148, 163, 184, 0.4);
+        padding: 24px 26px 26px;
+
+        display: grid;
+        grid-template-columns: 2fr 1fr; /* ✅ products wider than cart */
+        gap: 20px;
+      }
+
+      /* ✅ header spans across both columns */
+      .header {
+        grid-column: 1 / -1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 6px;
+      }
+
+      .header-title {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .header h1 {
+        margin: 0;
+        font-size: 1.9rem;
+      }
+
+      .header p {
+        margin: 0;
+        font-size: 0.95rem;
+        color: #9ca3af;
+      }
+
+      .badge {
+        background: rgba(37, 99, 235, 0.15);
+        border-radius: 999px;
+        padding: 6px 14px;
+        font-size: 0.78rem;
+        color: #bfdbfe;
+        border: 1px solid rgba(59, 130, 246, 0.6);
+      }
+
+      /* =========================================================
+         ✅ Product list (Left panel)
+         ========================================================= */
+
+      .products-panel {
+        padding-right: 6px;
+        border-right: 1px solid rgba(55, 65, 81, 0.9);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .section-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      /* ✅ responsive products grid */
+      .products-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 12px;
+      }
+
+      .product-card {
+        background: radial-gradient(circle at top, #111827, #020617 55%);
+        border-radius: 14px;
+        padding: 12px 12px 14px;
+        border: 1px solid rgba(55, 65, 81, 0.9);
+
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .product-name {
+        font-weight: 600;
+        font-size: 0.98rem;
+      }
+
+      .product-desc {
+        font-size: 0.8rem;
+        color: #9ca3af;
+      }
+
+      .product-footer {
+        margin-top: 6px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .product-price {
+        font-weight: 700;
+        color: #22c55e;
+        font-size: 0.98rem;
+      }
+
+      /* =========================================================
+         ✅ Buttons (shared)
+         ========================================================= */
+
+      button {
+        padding: 7px 12px;
+        border-radius: 999px;
+        border: none;
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #e5e7eb;
+        background: #2563eb;
+
+        transition: background 0.18s ease, transform 0.12s ease,
+          box-shadow 0.18s ease;
+
+        box-shadow: 0 3px 10px rgba(37, 99, 235, 0.45);
+      }
+
+      button:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+        box-shadow: 0 5px 16px rgba(37, 99, 235, 0.7);
+      }
+
+      button:active {
+        transform: translateY(0);
+        box-shadow: 0 3px 8px rgba(37, 99, 235, 0.45);
+      }
+
+      /* ✅ secondary button style */
+      .btn-secondary {
+        background: #6b7280;
+        box-shadow: 0 3px 10px rgba(75, 85, 99, 0.6);
+      }
+      .btn-secondary:hover {
+        background: #4b5563;
+      }
+
+      /* ✅ danger button style */
+      .btn-danger {
+        background: #dc2626;
+        box-shadow: 0 3px 10px rgba(220, 38, 38, 0.6);
+      }
+      .btn-danger:hover {
+        background: #b91c1c;
+      }
+
+      /* =========================================================
+         ✅ Cart panel (Right panel)
+         ========================================================= */
+
+      .cart-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .cart-card {
+        background: #030712;
+        border-radius: 16px;
+        padding: 14px 16px;
+        border: 1px solid rgba(55, 65, 81, 0.9);
+
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .cart-items {
+        max-height: 260px;
+        overflow-y: auto; /* ✅ scroll when items exceed height */
+        padding-right: 4px;
+      }
+
+      .cart-empty {
+        font-size: 0.82rem;
+        color: #9ca3af;
+      }
+
+      .cart-item {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 4px 8px;
+        padding: 8px 10px;
+        border-radius: 10px;
+
+        background: radial-gradient(
+          circle at left,
+          rgba(15, 23, 42, 0.9),
+          #020617
+        );
+        border: 1px solid rgba(55, 65, 81, 0.9);
+
+        margin-bottom: 6px;
+        align-items: center;
+      }
+
+      .cart-item-main {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .cart-item-name {
+        font-size: 0.9rem;
+        font-weight: 600;
+      }
+
+      .cart-item-price {
+        font-size: 0.8rem;
+        color: #9ca3af;
+      }
+
+      .cart-item-controls {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        justify-self: end;
+      }
+
+      .qty-display {
+        min-width: 26px;
+        text-align: center;
+        font-size: 0.9rem;
+      }
+
+      .small-btn {
+        padding: 3px 8px;
+        font-size: 0.8rem;
+        border-radius: 999px;
+      }
+
+      .remove-link {
+        color: #fca5a5;
+        font-size: 0.75rem;
+        cursor: pointer;
+        text-decoration: underline;
+        align-self: flex-start;
+        margin-top: 2px;
+      }
+
+      .cart-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 4px;
+        font-size: 0.9rem;
+      }
+
+      .total-label {
+        color: #9ca3af;
+      }
+
+      .total-value {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #4ade80;
+      }
+
+      .cart-actions {
+        display: flex;
+        justify-content: space-between;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      /* ✅ tiny status row with a dot */
+      .cart-status {
+        font-size: 0.78rem;
+        color: #9ca3af;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+
+      .dot-ok {
+        background: #22c55e; /* ✅ green = good */
+      }
+
+      .dot-wait {
+        background: #facc15; /* ✅ yellow = busy/waiting */
+      }
+    
