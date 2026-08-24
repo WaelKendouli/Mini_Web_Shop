@@ -285,3 +285,17 @@ const seedProducts = [
           renderCart();
         };
       }
+
+      function clearCart()
+      {
+        if(!confirm("Are you sure you want to clear the cart")) return ;
+
+        const tx = db.transaction("cart","readwrite");
+        const cardStore = tx.objectStore("cart");
+        cartStore.clear();
+
+        tx.oncomplete = function () {
+          renderCart();
+          setStatusOk("Basket cleared.");
+        };
+      }
