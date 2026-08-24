@@ -165,4 +165,7 @@ const seedProducts = [
         };
         }
 
-        
+         function goToCheckout() {
+        // ✅ navigate to checkout page (must exist in same folder)
+        window.location.href = "checkout.html";
+      }
