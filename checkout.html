@@ -1,51 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
     <title>Checkout – IndexedDB Basket</title>
-    <link rel="stylesheet" href="checkoutStyle.css">
-
+ <link rel="stylesheet" href="checkoutStyle.css">
     <!-- 2. LINK YOUR JAVASCRIPT FILE HERE (Option A: Recommended) -->
     <script src="CheckoutLogic.js" defer></script>
+    
+  </head>
 
-</head>
-<body>
-    <h1>Checkout</h1>
-    <p>Review your basket items stored in IndexedDB</p>
-    <button>⬅ Back to Shop</button>
+  <body>
+    <div class="checkout-shell">
+      <!-- ======================================================
+           ✅ HEADER
+           ====================================================== -->
+      <div class="checkout-header">
+        <div>
+          <h1>Checkout</h1>
+          <p>Review your basket items stored in IndexedDB</p>
+        </div>
 
-    <h2>🧺 Basket Summary</h2>
-    <table>
-        <thead>
+        <!-- ✅ Back to shop page -->
+        <button class="btn-secondary" onclick="goBack()">⬅ Back to Shop</button>
+      </div>
+
+      <!-- ======================================================
+           ✅ BASKET TABLE
+           ====================================================== -->
+      <div class="table-box">
+        <div class="section-title">🧺 Basket Summary</div>
+
+        <table>
+          <thead>
             <tr>
-                <th>Product</th>
-                <th>Qty</th>
-                <th>Price</th>
-                <th>Total</th>
+              <th>Product</th>
+              <th style="width: 80px">Qty</th>
+              <th style="width: 90px">Price</th>
+              <th style="width: 100px">Total</th>
             </tr>
-        </thead>
-        <tbody>
-        </tbody>
-    </table>
+          </thead>
 
-    <div>Loading basket...</div>
+          <!-- ✅ JS will insert rows here -->
+          <tbody id="basketBody"></tbody>
+        </table>
 
-    <div>
-        <strong>Total Amount:</strong>
-        <span>$0.00</span>
+        <!-- ✅ Small helper message under the table -->
+        <div id="emptyMsg" class="empty">Loading basket...</div>
+
+        <!-- ✅ Total amount summary -->
+        <div class="summary-row">
+          <span>Total Amount:</span>
+          <span id="totalAmount" class="total-value">$0.00</span>
+        </div>
+
+        <!-- ✅ Actions -->
+        <div style="margin-top: 12px; display: flex; gap: 8px">
+          <button class="btn-danger" onclick="clearBasket()">
+            🗑 Clear Basket
+          </button>
+          <button onclick="confirmOrder()">✅ Confirm Order</button>
+        </div>
+      </div>
+
+      <!-- ======================================================
+           ✅ STATUS BAR
+           ====================================================== -->
+      <div class="status-bar">
+        <div class="status-row">
+          <span id="statusDot" class="status-dot dot-wait"></span>
+          <span id="statusText">Opening database...</span>
+        </div>
+        <span>Basket stored in IndexedDB → cart</span>
+      </div>
+
     </div>
-
-    <div>
-        <button>🗑 Clear Basket</button>
-        <button>✅ Confirm Order</button>
-    </div>
-
-    <hr>
-    <div>
-        <span>●</span>
-        <span>Opening database...</span>
-    </div>
-    <div>Basket stored in IndexedDB → cart</div>
 </body>
 </html>
