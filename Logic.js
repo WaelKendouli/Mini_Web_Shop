@@ -223,4 +223,13 @@ const seedProducts = [
             }
           };
         };
+        tx.oncomplete = function () {
+          renderCart();
+          setStatusOk("Basket updated.");
+        };
+
+        tx.onerror = function () {
+          console.error("Error adding to cart.");
+          setStatusWait("Error updating basket.");
+        };
       }
