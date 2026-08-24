@@ -185,3 +185,42 @@ const seedProducts = [
         // ✅ navigate to checkout page (must exist in same folder)
         window.location.href = "checkout.html";
       }
+
+      function addToCart(productID)
+      {
+                setStatusWait("Updating basket...");
+
+                const tx = db.transaction(["products", "cart"], "readwrite");
+                        const productsStore = tx.objectStore("products");
+                const cartStore = tx.objectStore("cart");
+
+                const productRequest = productsStore.get(productID);
+                productRequest.onsuccess = function() {
+
+                 const product = productRequest.result;
+          if (!product) {
+            console.error("Product not found:", productId);
+            setStatusWait("Product not found.");
+            return;
+          }
+            const cartItemRequest = cartStore.get(productId);
+
+          cartItemRequest.onsuccess = function () {
+            const existing = cartItemRequest.result;
+
+            if (existing) {
+              // ✅ already in cart → increment quantity
+              existing.quantity += 1;
+              cartStore.put(existing); // put() updates existing row
+            } else {
+              // ✅ not in cart → create new cart item
+              cartStore.add({
+                id: product.id,
+                name: product.name,
+                price: product.price,
+                quantity: 1,
+              });
+            }
+          };
+        };
+      }
