@@ -71,6 +71,22 @@ const seedProducts = [
         });
 
      } 
+      // ✅ Runs when DB is opened successfully
+      openReq.onsuccess = function (event) {
+        db = event.target.result; // save db globally
+        setStatusOk("Database opened.");
+
+        // ✅ On startup: render products and cart
+        loadProducts();
+        renderCart();
+      };
+
+      // ✅ Runs when opening fails
+      openReq.onerror = function (event) {
+        console.error("Error opening ShopDB:", event.target.error);
+        setStatusWait("Error opening DB.");
+      };
+
         function loadProducts()
         {
             productsGrid.innerHTML = "";
