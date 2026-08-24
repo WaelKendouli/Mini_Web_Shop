@@ -250,3 +250,27 @@ const seedProducts = [
           renderCart(); // refresh UI
         };
       }
+
+
+      function decreaseQty(ProductID)
+      {
+        const tx = db.transaction("cart","readwrite");
+        const cartStore = tx.objectStore("cart");
+        const req = cartStore.get(ProductID);
+
+        req.onsuccess = function() {
+            const item = req.result;
+            if(!item) return;
+            if (item.quantity <= 1) {
+                cartStore.delete(productID);
+            }
+            else
+            {
+            item.quantity -=1;
+            cartStore.put(item);
+            }  
+        }
+        tx.oncomplete = function () {
+          renderCart(); // refresh UI
+        };
+      }
