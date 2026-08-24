@@ -233,3 +233,20 @@ const seedProducts = [
           setStatusWait("Error updating basket.");
         };
       }
+
+      function increaseQty(ProductID)
+      {
+        const tx = db.transaction("cart","readwrite");
+        const cartStore = tx.objectStore("cart");
+        const req = cartStore.get(ProductID);
+
+        req.onsuccess = function() {
+            const item = req.result;
+            if(!item) return;
+            item.quantity +=1;
+            cartStore.put(item);
+        }
+        tx.oncomplete = function () {
+          renderCart(); // refresh UI
+        };
+      }
