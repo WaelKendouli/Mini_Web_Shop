@@ -108,3 +108,61 @@ const seedProducts = [
           console.error("Error loading products.");
         };
         }
+
+        function renderCart()
+        {
+             cartItems.innerHTML = "";
+        const tx = db.transaction("cart", "readonly");
+        const cartStore = tx.objectStore("cart");
+        const req = cartStore.getAll();
+
+        req.onsuccess = function () {
+            const items = req.result;
+            if (!items || items.length === 0) {
+            cartEmpty.style.display = "block";
+            cartEmpty.textContent = "Your basket is empty.";
+            cartTotal.textContent = "$0.00";
+            return;
+          }
+            cartEmpty.style.display = "none";
+            let total = 0 ;
+            items.forEach((item) => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+
+                const row = document.createElement("div");
+            row.className = "cart-item";
+
+            row.innerHTML = `
+              <div class="cart-item-main">
+                <div class="cart-item-name">${item.name}</div>
+                <div class="cart-item-price">
+                  $${item.price.toFixed(2)} × ${
+              item.quantity
+            } = $${itemTotal.toFixed(2)}
+                </div>
+                <span class="remove-link" onclick="removeFromCart(${item.id})">
+                  Remove
+                </span>
+              </div>
+
+              <div class="cart-item-controls">
+                <button class="small-btn" onclick="decreaseQty(${
+                  item.id
+                })">−</button>
+                <span class="qty-display">${item.quantity}</span>
+                <button class="small-btn" onclick="increaseQty(${
+                  item.id
+                })">+</button>
+              </div>
+            `;
+            cartItems.appendChild(row);
+            });
+              cartTotal.textContent = "$" + total.toFixed(2);
+        };
+         req.onerror = function () {
+          console.error("Error reading cart.");
+        };
+        }
+
+        
