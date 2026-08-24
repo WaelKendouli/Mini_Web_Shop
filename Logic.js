@@ -274,3 +274,14 @@ const seedProducts = [
           renderCart(); // refresh UI
         };
       }
+
+      function removeFromCart(productId) {
+        const tx = db.transaction("cart", "readwrite");
+        const cartStore = tx.objectStore("cart");
+
+        cartStore.delete(productId);
+
+        tx.oncomplete = function () {
+          renderCart();
+        };
+      }
