@@ -23,6 +23,7 @@
       const request = indexedDB.open("shopDB" , 1);
       request.onsuccess = function(e) {
         db = e.target.result;
+        loadCart();
                 setStatusOk("Database opened.");
       }
 
