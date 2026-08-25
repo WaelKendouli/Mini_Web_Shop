@@ -20,11 +20,11 @@
 
       setStatusWait("Opening database...");
 
-      const request = indexedDB.open("shopDB" , 1);
+      const request = indexedDB.open("ShopDB" , 1);
       request.onsuccess = function(e) {
         db = e.target.result;
-        loadCart();
                 setStatusOk("Database opened.");
+                loadCart();
       }
 
       function loadCart()
@@ -44,7 +44,6 @@
             totalAmount.textContent = "$0.00";
             return;
           }
-          emptyMsg.textContent = "";
            emptyMsg.textContent = "";
 
           let total = 0;
