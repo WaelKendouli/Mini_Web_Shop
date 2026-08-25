@@ -72,3 +72,24 @@
         }
 
       }
+
+      function clearBasket()
+      {
+                if (!confirm("Clear entire basket?")) return;
+                const tx = db.transaction("cart","readwrite");
+                const store = tx.objectStore("cart");
+
+                store.clear().onsuccess = () => {
+          emptyMsg.textContent = "Basket is empty.";
+          basketBody.innerHTML = "";
+          totalAmount.textContent = "$0.00";
+          setStatusOk("Basket cleared.");
+        };
+      }
+
+     function confirmOrder() {
+        alert("Demo only: Order confirmed!");
+     }
+      function goBack() {
+        window.location.href = "shop.html";
+      }
