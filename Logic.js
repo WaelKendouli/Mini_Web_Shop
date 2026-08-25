@@ -23,8 +23,8 @@ let db = null;
       
      openReq.onupgradeneeded = function (event) {
             const InstanceDB = event.target.result;
-            InstanceDB.createObjectStore("products" , {keypath : "id"});
-            InstanceDB.createObjectStore("cart" , {keypath : "id"});
+            InstanceDB.createObjectStore("products" , {keyPath : "id"});
+            InstanceDB.createObjectStore("cart" , {keyPath : "id"});
 const seedProducts = [
           {
             id: 1,
@@ -64,7 +64,7 @@ const seedProducts = [
           },
         ];
         const tx = event.target.transaction;
-        const store = tx.ObjectStore("products");
+        const store = tx.objectStore("products");
         seedProducts.forEach((product) => 
         {
             store.add(product);
@@ -97,12 +97,12 @@ const seedProducts = [
             const request = store.getAll();
             request.onsuccess = function () {
                 const Products = request.result;
-                if (!Products || Products.lengh === 0) {
+                if (!Products || Products.length  === 0) {
                     productsGrid.innerHTML =
               "<p style='color:#9ca3af;font-size:0.9rem;'>No products found.</p>";
             return;
                 }
-                products.forEach((product) => {
+                Products.forEach((product) => {
             const card = document.createElement("div");
             card.className = "product-card";
 
@@ -199,11 +199,11 @@ const seedProducts = [
 
                  const product = productRequest.result;
           if (!product) {
-            console.error("Product not found:", productId);
+            console.error("Product not found:", productID);
             setStatusWait("Product not found.");
             return;
           }
-            const cartItemRequest = cartStore.get(productId);
+            const cartItemRequest = cartStore.get(productID);
 
           cartItemRequest.onsuccess = function () {
             const existing = cartItemRequest.result;
@@ -262,7 +262,7 @@ const seedProducts = [
             const item = req.result;
             if(!item) return;
             if (item.quantity <= 1) {
-                cartStore.delete(productID);
+                cartStore.delete(ProductID);
             }
             else
             {
@@ -291,7 +291,7 @@ const seedProducts = [
         if(!confirm("Are you sure you want to clear the cart")) return ;
 
         const tx = db.transaction("cart","readwrite");
-        const cardStore = tx.objectStore("cart");
+        const cartStore = tx.objectStore("cart");
         cartStore.clear();
 
         tx.oncomplete = function () {
